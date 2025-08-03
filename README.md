@@ -382,4 +382,4 @@ npm run test:coverage
 
 ---
 
-**Built with ❤️ by the Cross-Swaps Team**
+**Built with ❤️**
