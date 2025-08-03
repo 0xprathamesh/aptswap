@@ -17,10 +17,10 @@ const USER_APTOS_PRIVATE_KEY =
 // Liquidity Provider Account Details
 const PROVIDER_SEPOLIA_PRIVATE_KEY =
   process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
-  "0x4045b15806e29d95d1652f3c718f115dedae82216debd6920e42375f019432a2";
+  "";
 const PROVIDER_APTOS_PRIVATE_KEY =
   process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY ||
-  "0xe47bc1ab7808c62c9e2d01437891e9b9d69b8c1d845d317be14dea9b36bfe090";
+  "";
 
 // Contract addresses (from your deployment)
 const SEPOLIA_CONTRACTS = {

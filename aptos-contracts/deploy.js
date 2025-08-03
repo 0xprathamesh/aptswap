@@ -5,7 +5,7 @@ const APTOS_NODE_URL =
   process.env.APTOS_NODE_URL || "https://fullnode.mainnet.aptoslabs.com/v1";
 const PRIVATE_KEY =
   process.env.APTOS_PRIVATE_KEY ||
-  "0xe47bc1ab7808c62c9e2d01437891e9b9d69b8c1d845d317be14dea9b36bfe090";
+  "";
 
 // Initialize Aptos client
 const client = new AptosClient(APTOS_NODE_URL);

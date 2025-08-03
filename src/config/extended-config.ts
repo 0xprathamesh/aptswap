@@ -89,7 +89,7 @@ export const extendedConfig = {
       ownerPrivateKey:
         process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
         process.env.WALLET_PRIVATE_KEY ||
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "",
       blockNumber: 19991288,
       tokens: {
         USDC: {
@@ -126,7 +126,7 @@ export const extendedConfig = {
         process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
         process.env.SEPOLIA_PRIVATE_KEY ||
         process.env.WALLET_PRIVATE_KEY ||
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "",
       blockNumber: 8894594,
       tokens: {
         USDC: {
@@ -162,7 +162,7 @@ export const extendedConfig = {
       ownerPrivateKey:
         process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
         process.env.WALLET_PRIVATE_KEY ||
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "",
       blockNumber: 19991288,
       tokens: {
         USDC: {
@@ -198,7 +198,7 @@ export const extendedConfig = {
       ownerPrivateKey:
         process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
         process.env.WALLET_PRIVATE_KEY ||
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "",
       blockNumber: 19991288,
       tokens: {
         USDC: {
@@ -227,7 +227,7 @@ export const extendedConfig = {
       ownerPrivateKey:
         process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
         process.env.WALLET_PRIVATE_KEY ||
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "",
       blockNumber: 29621722,
       tokens: {
         USDC: {
@@ -263,7 +263,7 @@ export const extendedConfig = {
       ownerPrivateKey:
         process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY ||
         process.env.APTOS_PRIVATE_KEY ||
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "",
       moduleAddress:
         process.env.APTOS_MODULE_ADDRESS ||
         "0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e",
@@ -286,7 +286,7 @@ export const extendedConfig = {
       ownerPrivateKey:
         process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY ||
         process.env.APTOS_PRIVATE_KEY ||
-        "0xe47bc1ab7808c62c9e2d01437891e9b9d69b8c1d845d317be14dea9b36bfe090",
+        "",
       moduleAddress:
         process.env.APTOS_MODULE_ADDRESS ||
         "0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e",
