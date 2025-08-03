@@ -196,24 +196,27 @@ The project includes comprehensive cross-chain swap tests. Follow these steps to
 #### Prerequisites for Testing
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Set up Environment Variables**
+
    ```bash
    cp env.example .env
    ```
 
 3. **Configure Test Environment**
    Edit `.env` file with your test accounts:
+
    ```env
    # Test Account Configuration
    USER_SEPOLIA_PRIVATE_KEY=your_user_sepolia_private_key_here
    USER_APTOS_PRIVATE_KEY=your_user_aptos_private_key_here
    LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY=your_provider_sepolia_private_key_here
    LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY=your_provider_aptos_private_key_here
-   
+
    # RPC Endpoints
    APTOS_NODE_URL=https://fullnode.testnet.aptoslabs.com/v1
    ```
@@ -230,12 +233,14 @@ node tests/test-aptos-to-sepolia-swap.js
 ```
 
 **What this test does:**
+
 - User locks APT tokens on Aptos
 - Provider locks mUSDC tokens on Sepolia
 - Cross-chain atomic swap execution
 - Secret revelation and fund claiming
 
 **Expected Output:**
+
 ```
 === APTOS TO ETHEREUM CROSS-CHAIN SWAP TEST ===
 Aptos → Sepolia Transfer (User gets mUSDC, Provider gets APT)
@@ -267,12 +272,14 @@ node tests/final-cross-chain-test.js
 ```
 
 **What this test does:**
+
 - Complete HTLC-based atomic swap
 - Sepolia ↔ Aptos bidirectional flow
 - Order management and tracking
 - Dynamic order ID handling
 
 **Expected Output:**
+
 ```
 === FINAL CROSS-CHAIN SWAP TEST ===
 Starting FINAL cross-chain swap test...
@@ -293,6 +300,7 @@ FINAL CROSS-CHAIN SWAP COMPLETED SUCCESSFULLY
 #### Test Configuration
 
 **Contract Addresses (Testnet):**
+
 - **Sepolia Contracts:**
   - Resolver: `0x57127879803e313659c1e0dF410ec73ddf5A11F7`
   - Factory: `0x219F228e8e46Eb384FD299F0784e5CA8c67B4480`
@@ -308,12 +316,14 @@ FINAL CROSS-CHAIN SWAP COMPLETED SUCCESSFULLY
 **Common Issues:**
 
 1. **RPC Connection Errors:**
+
    ```bash
    # Check RPC endpoints in .env
    # Ensure you have sufficient testnet tokens
    ```
 
 2. **Private Key Issues:**
+
    ```bash
    # Verify private keys are correctly set in .env
    # Ensure accounts have sufficient balance
@@ -328,6 +338,7 @@ FINAL CROSS-CHAIN SWAP COMPLETED SUCCESSFULLY
 #### Test Results
 
 Test results are saved to JSON files for analysis:
+
 - `final-cross-chain-test-results.json` - Complete test results
 - Transaction hashes and order IDs for verification
 

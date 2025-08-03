@@ -7,8 +7,7 @@ const CONFIG = {
   // Ethereum Sepolia
   SEPOLIA_RPC: "https://sepolia.infura.io/v3/cb77ec7104e04b26a8bba8520e720054",
   SEPOLIA_CONTRACT_ADDRESS: "0xBD64245289114b11B35C4fF35605a525a7dF1f53",
-  SEPOLIA_RESOLVER_PRIVATE_KEY:
-    process.env.SEPOLIA_RESOLVER_PRIVATE_KEY || "",
+  SEPOLIA_RESOLVER_PRIVATE_KEY: process.env.SEPOLIA_RESOLVER_PRIVATE_KEY || "",
   SEPOLIA_RESOLVER: "0xEAde2298C7d1b5C748103da66D6Dd9Cf204E2AD2",
 
   // Aptos Devnet
@@ -91,9 +90,8 @@ class Resolver {
         createTxnRequest
       );
 
-      const createTxnResult = await this.aptosClient.submitTransaction(
-        signedCreateTxn
-      );
+      const createTxnResult =
+        await this.aptosClient.submitTransaction(signedCreateTxn);
       await this.aptosClient.waitForTransaction(createTxnResult.hash);
 
       const createTxn = await this.aptosClient.getTransactionByHash(
@@ -128,9 +126,8 @@ class Resolver {
         liquidityTxnRequest
       );
 
-      const liquidityTxnResult = await this.aptosClient.submitTransaction(
-        signedLiquidityTxn
-      );
+      const liquidityTxnResult =
+        await this.aptosClient.submitTransaction(signedLiquidityTxn);
       await this.aptosClient.waitForTransaction(liquidityTxnResult.hash);
 
       const liquidityTxn = await this.aptosClient.getTransactionByHash(

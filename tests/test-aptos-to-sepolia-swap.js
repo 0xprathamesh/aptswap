@@ -8,19 +8,16 @@ const APTOS_NODE_URL = "https://fullnode.testnet.aptoslabs.com/v1";
 
 // User Account Details (for Aptos to Sepolia swap)
 const USER_SEPOLIA_PRIVATE_KEY =
-  process.env.USER_SEPOLIA_PRIVATE_KEY ||
-  "0x452818e6823f8d67084e08b3f88656d8440cac2ad71966b454884f61b209ba41";
+  process.env.USER_SEPOLIA_PRIVATE_KEY || "";
+
 const USER_APTOS_PRIVATE_KEY =
-  process.env.USER_APTOS_PRIVATE_KEY ||
-  "0x0a4fca86d57523d0e40e4060fe5739bc0f649b727dfa9aeede2a942df9f96600";
+  process.env.USER_APTOS_PRIVATE_KEY || "";
 
 // Provider Account Details (for liquidity provision)
 const PROVIDER_SEPOLIA_PRIVATE_KEY =
-  process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
-  "";
+  process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY || "";
 const PROVIDER_APTOS_PRIVATE_KEY =
-  process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY ||
-  "";
+  process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY || "";
 
 // Contract addresses
 const SEPOLIA_CONTRACTS = {
@@ -167,8 +164,9 @@ async function announceOrder(amount, minAmount, secretHash) {
       } catch (error) {
         console.log(`Retry ${i + 1}/5: Resource not ready yet...`);
         if (i === 4) {
-          announceOrderId = 50;
-          console.log("Using fallback Order ID:", announceOrderId);
+          throw new Error(
+            "Failed to retrieve order ID after 5 attempts. Please check the transaction manually."
+          );
         }
       }
     }
@@ -236,8 +234,9 @@ async function fundAptosEscrow(amount, secretHash, previousOrderId = null) {
       } catch (error) {
         console.log(`Retry ${i + 1}/5: Resource not ready yet...`);
         if (i === 4) {
-          fundOrderId = previousOrderId !== null ? previousOrderId + 1 : 51;
-          console.log("Using estimated Fund Order ID:", fundOrderId);
+          throw new Error(
+            "Failed to retrieve fund order ID after 5 attempts. Please check the transaction manually."
+          );
         }
       }
     }

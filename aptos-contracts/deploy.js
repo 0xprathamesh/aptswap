@@ -3,9 +3,7 @@ const { AptosClient, Account } = require("@aptos-labs/ts-sdk");
 // Configuration
 const APTOS_NODE_URL =
   process.env.APTOS_NODE_URL || "https://fullnode.mainnet.aptoslabs.com/v1";
-const PRIVATE_KEY =
-  process.env.APTOS_PRIVATE_KEY ||
-  "";
+const PRIVATE_KEY = process.env.APTOS_PRIVATE_KEY || "";
 
 // Initialize Aptos client
 const client = new AptosClient(APTOS_NODE_URL);

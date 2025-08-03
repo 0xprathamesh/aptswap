@@ -8,19 +8,15 @@ const APTOS_NODE_URL = "https://fullnode.testnet.aptoslabs.com/v1";
 
 // User Account Details
 const USER_SEPOLIA_PRIVATE_KEY =
-  process.env.USER_SEPOLIA_PRIVATE_KEY ||
-  "0x452818e6823f8d67084e08b3f88656d8440cac2ad71966b454884f61b209ba41";
+  process.env.USER_SEPOLIA_PRIVATE_KEY || "";
 const USER_APTOS_PRIVATE_KEY =
-  process.env.USER_APTOS_PRIVATE_KEY ||
-  "0x0a4fca86d57523d0e40e4060fe5739bc0f649b727dfa9aeede2a942df9f96600";
+  process.env.USER_APTOS_PRIVATE_KEY || "";
 
 // Liquidity Provider Account Details
 const PROVIDER_SEPOLIA_PRIVATE_KEY =
-  process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY ||
-  "";
+  process.env.LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY || "";
 const PROVIDER_APTOS_PRIVATE_KEY =
-  process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY ||
-  "";
+  process.env.LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY || "";
 
 // Contract addresses (from your deployment)
 const SEPOLIA_CONTRACTS = {
