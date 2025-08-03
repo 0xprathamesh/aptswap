@@ -189,7 +189,149 @@ curl -X POST "http://localhost:3000/api/v1/order" \
 
 ## 🧪 Testing
 
-### Run Tests
+### Quick Test Setup
+
+The project includes comprehensive cross-chain swap tests. Follow these steps to run the tests:
+
+#### Prerequisites for Testing
+
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Set up Environment Variables**
+   ```bash
+   cp env.example .env
+   ```
+
+3. **Configure Test Environment**
+   Edit `.env` file with your test accounts:
+   ```env
+   # Test Account Configuration
+   USER_SEPOLIA_PRIVATE_KEY=your_user_sepolia_private_key_here
+   USER_APTOS_PRIVATE_KEY=your_user_aptos_private_key_here
+   LIQUIDITY_PROVIDER_SEPOLIA_PRIVATE_KEY=your_provider_sepolia_private_key_here
+   LIQUIDITY_PROVIDER_APTOS_PRIVATE_KEY=your_provider_aptos_private_key_here
+   
+   # RPC Endpoints
+   APTOS_NODE_URL=https://fullnode.testnet.aptoslabs.com/v1
+   ```
+
+#### Running Cross-Chain Swap Tests
+
+##### Test 1: Aptos to Sepolia Swap (`test-aptos-to-sepolia-swap.js`)
+
+This test demonstrates a complete cross-chain swap from Aptos to Sepolia:
+
+```bash
+# Run the Aptos to Sepolia swap test
+node tests/test-aptos-to-sepolia-swap.js
+```
+
+**What this test does:**
+- User locks APT tokens on Aptos
+- Provider locks mUSDC tokens on Sepolia
+- Cross-chain atomic swap execution
+- Secret revelation and fund claiming
+
+**Expected Output:**
+```
+=== APTOS TO ETHEREUM CROSS-CHAIN SWAP TEST ===
+Aptos → Sepolia Transfer (User gets mUSDC, Provider gets APT)
+DIRECT BLOCKCHAIN INTERACTION - NO API
+
+Account Details:
+   • User Sepolia: 0x...
+   • User Aptos: 0x...
+   • Provider Sepolia: 0x...
+   • Provider Aptos: 0x...
+
+Step 1: User announcing order on Aptos (locks APT)...
+Step 2: User funding destination escrow on Aptos (locks APT)...
+Step 3: Initializing swap ledger on Aptos...
+Step 4: Provider creating order on Sepolia (locks mUSDC)...
+Step 5: User claiming mUSDC on Sepolia (gets the swap result)...
+Step 6: Provider claiming APT on Aptos (gets User's APT)...
+
+APTOS TO ETHEREUM CROSS-CHAIN SWAP COMPLETED SUCCESSFULLY
+```
+
+##### Test 2: Final Cross-Chain Test (`final-cross-chain-test.js`)
+
+This test demonstrates the complete cross-chain swap protocol:
+
+```bash
+# Run the final cross-chain test
+node tests/final-cross-chain-test.js
+```
+
+**What this test does:**
+- Complete HTLC-based atomic swap
+- Sepolia ↔ Aptos bidirectional flow
+- Order management and tracking
+- Dynamic order ID handling
+
+**Expected Output:**
+```
+=== FINAL CROSS-CHAIN SWAP TEST ===
+Starting FINAL cross-chain swap test...
+Amount: 10,000 CST tokens
+Min Amount: 9,500 CST tokens
+
+Step 1: User creates order on Sepolia (source chain)...
+Step 1.5: Deploying escrow on Sepolia...
+Step 2: Initializing swap ledger on Aptos...
+Step 3: Announcing order on Aptos...
+Step 4: Funding destination escrow on Aptos...
+Step 5: User claims funds on Aptos...
+Step 6: Resolver withdraws funds from Sepolia...
+
+FINAL CROSS-CHAIN SWAP COMPLETED SUCCESSFULLY
+```
+
+#### Test Configuration
+
+**Contract Addresses (Testnet):**
+- **Sepolia Contracts:**
+  - Resolver: `0x57127879803e313659c1e0dF410ec73ddf5A11F7`
+  - Factory: `0x219F228e8e46Eb384FD299F0784e5CA8c67B4480`
+  - Mock USDC: `0x4A2C3824C1c1B7fC05381893d85FB085d38Acc0f`
+
+- **Aptos Contracts (Testnet):**
+  - Account: `0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e`
+  - Swap Ledger: `0xb7be566097698963883013d9454bcfb6275670040f437ed178a76c42154e9b15`
+  - Swap V3 Module: `0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e::swap_v3`
+
+#### Troubleshooting
+
+**Common Issues:**
+
+1. **RPC Connection Errors:**
+   ```bash
+   # Check RPC endpoints in .env
+   # Ensure you have sufficient testnet tokens
+   ```
+
+2. **Private Key Issues:**
+   ```bash
+   # Verify private keys are correctly set in .env
+   # Ensure accounts have sufficient balance
+   ```
+
+3. **Contract Deployment:**
+   ```bash
+   # If contracts are not deployed, run deployment scripts first
+   npm run deploy:contracts
+   ```
+
+#### Test Results
+
+Test results are saved to JSON files for analysis:
+- `final-cross-chain-test-results.json` - Complete test results
+- Transaction hashes and order IDs for verification
+
+### Other Tests
 
 ```bash
 # Unit tests
@@ -200,11 +342,8 @@ forge test
 
 # Integration tests
 npm run test:integration
-```
 
-### Test Coverage
-
-```bash
+# Test coverage
 npm run test:coverage
 ```
 
