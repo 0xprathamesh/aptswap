@@ -35,34 +35,26 @@ A cross-chain swap protocol that extends 1inch functionality to unsupported chai
 - Git
 
 ## 🛠️ Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd cross_swaps
-   ```
-
-2. **Install dependencies**
+ **Install dependencies**
 
    ```bash
    npm install
    ```
 
-3. **Install Foundry**
+ **Install Foundry**
 
    ```bash
    curl -L https://foundry.paradigm.xyz | bash
    foundryup
    ```
 
-4. **Install contract dependencies**
+ **Install contract dependencies**
 
    ```bash
    forge install
    ```
 
-5. **Set up environment variables**
+ **Set up environment variables**
    ```bash
    cp env.example .env
    # Edit .env with your configuration
@@ -108,7 +100,7 @@ WALLET_ADDRESS=your_ethereum_address
 1. **Start the API server**
 
    ```bash
-   npm run dev
+   npm start
    ```
 
 2. **Access the API**
@@ -359,24 +351,6 @@ npm run test:coverage
 ```
 
 ## 🔧 Development
-
-### Project Structure
-
-```
-cross_swaps/
-├── src/
-│   ├── routes/          # API routes
-│   ├── services/        # Business logic
-│   ├── utils/           # Utilities and helpers
-│   ├── types/           # TypeScript type definitions
-│   └── server.ts        # Main server file
-├── contracts/
-│   ├── src/             # Smart contracts
-│   └── lib/             # Contract dependencies
-├── tests/               # Test files
-├── client/              # Client examples
-└── sources/             # Aptos Move contracts
-```
 
 ### Adding New Chains
 
