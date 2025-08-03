@@ -1,0 +1,27 @@
+{
+  "name": "cross-swaps-aptos",
+  "version": "1.0.0",
+  "description": "Aptos contracts for Cross-Swaps protocol",
+  "main": "deploy.js",
+  "scripts": {
+    "deploy": "node deploy.js",
+    "compile": "aptos move compile",
+    "test": "aptos move test"
+  },
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.10.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "keywords": [
+    "aptos",
+    "move",
+    "cross-chain",
+    "swaps",
+    "defi"
+  ],
+  "author": "Cross-Swaps Team",
+  "license": "MIT"
+}

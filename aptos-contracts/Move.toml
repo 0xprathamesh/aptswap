@@ -1,0 +1,12 @@
+[package]
+name = "cross_swaps_aptos"
+version = "1.0.0"
+upgrade_policy = "compatible"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "main" }
+
+[addresses]
+cross_swaps = "_"
+swap_addr_v3 = "_"
+mytoken_addr = "_" 

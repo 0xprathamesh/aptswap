@@ -1,0 +1,20 @@
+{
+  "network": "Aptos Testnet",
+  "account": "0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e",
+  "deployedAt": "2025-01-01T18:51:00.000Z",
+  "contracts": {
+    "myTokenModule": "0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e::my_token",
+    "swapV3Module": "0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e::swap_v3",
+    "tokenName": "CrossSwaps Token",
+    "tokenSymbol": "CST",
+    "tokenDecimals": 8
+  },
+  "transactions": {
+    "deploy": "0x015a3477fe21ffa4d6d795a17ffca7e63f56c6cb9acbad59cbc03d7cbcd1bc15",
+    "initializeToken": "0xa0cd7ac0b406ed6331a81ef7c4e232eccd9ceb5d2a2c3a6437c8adbf0ec9d95f",
+    "initializeSwapLedger": "0x00db3254df971032948c008e05500ba46c9447cfba13f2e51f8c3e04f3005e92",
+    "mintTestTokens": "0xde366785d453c17df6c11c5cf8a5501e85fa98fd0297f533f152b24dc6b757b9"
+  },
+  "status": "deployed",
+  "explorerUrl": "https://explorer.aptoslabs.com/account/0xdf1a31fd439c81d59f727c737f84824138582e1af58c43ee147defdf223b736e?network=testnet"
+}
