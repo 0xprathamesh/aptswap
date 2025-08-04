@@ -27,11 +27,11 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({
 
   const tokens: Token[] = [
     {
-      symbol: "mUSDC",
-      name: "Mock USDC",
+      symbol: "ETH",
+      name: "Ethereum",
       logoURI:
-        "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png",
-      address: "0x4A2C3824C1c1B7fC05381893d85FB085d38Acc0f",
+        "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+      address: "0x0000000000000000000000000000000000000000",
       chain: "Sepolia",
     },
     {
@@ -44,6 +44,17 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({
     },
   ];
 
+  // Filter tokens based on type for Sepolia to Aptos swap
+  const getAvailableTokens = () => {
+    if (type === "in") {
+      // Input tokens (Sepolia side)
+      return tokens.filter(token => token.chain === "Sepolia");
+    } else {
+      // Output tokens (Aptos side)
+      return tokens.filter(token => token.chain === "Aptos");
+    }
+  };
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
@@ -55,7 +66,8 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({
 
   const toggleSelector = () => setIsOpen((prev) => !prev);
 
-  const filteredTokens = tokens.filter((token) =>
+  const availableTokens = getAvailableTokens();
+  const filteredTokens = availableTokens.filter((token) =>
     [token.name, token.symbol].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )

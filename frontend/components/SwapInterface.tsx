@@ -31,8 +31,26 @@ const SwapInterface: React.FC = () => {
 
   const [amountIn, setAmountIn] = useState<string>("");
   const [amountOut, setAmountOut] = useState<string>("");
-  const [tokenIn, setTokenIn] = useState<Token | undefined>();
-  const [tokenOut, setTokenOut] = useState<Token | undefined>();
+  // Default tokens for Sepolia to Aptos swap (using ETH as per test)
+  const defaultTokenIn: Token = {
+    symbol: "ETH",
+    name: "Ethereum",
+    logoURI: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+    address: "0x0000000000000000000000000000000000000000",
+    chain: "Sepolia",
+  };
+
+  const defaultTokenOut: Token = {
+    symbol: "APT",
+    name: "Aptos",
+    logoURI:
+      "https://assets.coingecko.com/coins/images/26455/small/aptos_round.png",
+    address: "0x1::aptos_coin::AptosCoin",
+    chain: "Aptos",
+  };
+
+  const [tokenIn, setTokenIn] = useState<Token>(defaultTokenIn);
+  const [tokenOut, setTokenOut] = useState<Token>(defaultTokenOut);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [isReviewComplete, setIsReviewComplete] = useState<boolean>(false);
@@ -96,6 +114,33 @@ const SwapInterface: React.FC = () => {
     toast.success("Petra wallet disconnected");
   };
 
+  // Calculate quote for ETH to APT swap
+  const calculateQuote = useCallback(() => {
+    if (!amountIn || parseFloat(amountIn) <= 0) {
+      setQuoteData(null);
+      return;
+    }
+
+    const ethAmount = parseFloat(amountIn);
+    const aptAmount = ethAmount * 1000; // 0.001 ETH = 1 APT
+    const exchangeRate = 1000; // 1 ETH = 1000 APT
+
+    setQuoteData({
+      ethAmount: ethAmount,
+      aptosAmount: aptAmount,
+      exchangeRate: exchangeRate,
+      ethPrice: prices.eth,
+      aptPrice: prices.apt,
+    });
+
+    setAmountOut(aptAmount.toString());
+  }, [amountIn, prices.eth, prices.apt]);
+
+  // Calculate quote when amountIn changes
+  useEffect(() => {
+    calculateQuote();
+  }, [calculateQuote]);
+
   // Fetch prices from CoinGecko
   const fetchPrices = async () => {
     try {
@@ -104,8 +149,8 @@ const SwapInterface: React.FC = () => {
       );
       const data = await response.json();
       setPrices({
-        eth: data.ethereum.usd,
-        apt: data.aptos.usd,
+        eth: data.ethereum?.usd || 0,
+        apt: data.aptos?.usd || 0,
       });
     } catch (error) {
       console.error("Error fetching prices:", error);
@@ -163,14 +208,14 @@ const SwapInterface: React.FC = () => {
   const handleTokenInSelect = (token: Token) => {
     setTokenIn(token);
     if (tokenOut && token.symbol === tokenOut.symbol) {
-      setTokenOut(undefined);
+      setTokenOut(defaultTokenOut);
     }
   };
 
   const handleTokenOutSelect = (token: Token) => {
     setTokenOut(token);
     if (tokenIn && token.symbol === tokenIn.symbol) {
-      setTokenIn(undefined);
+      setTokenIn(defaultTokenIn);
     }
   };
 
@@ -205,16 +250,9 @@ const SwapInterface: React.FC = () => {
     }
   }, [isConnected, isPetraConnected, amountIn, tokenIn, tokenOut, quoteData]);
 
-  // Execute swap
+  // Execute swap using API
   const executeSwap = async () => {
-    if (
-      !walletClient ||
-      !amountIn ||
-      !tokenIn ||
-      !tokenOut ||
-      !quoteData ||
-      !isPetraConnected
-    ) {
+    if (!amountIn || !tokenIn || !tokenOut || !isPetraConnected || !address) {
       toast.error("Missing required data for swap");
       return;
     }
@@ -224,172 +262,61 @@ const SwapInterface: React.FC = () => {
 
     try {
       const swapAmount = parseFloat(amountIn);
-      const { secret, secretHash } = generateSecretAndHash();
 
-      // Step 1: Create Sepolia order
-      setLoadingMessage("Creating Sepolia escrow...");
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const walletSigner = await provider.getSigner();
+      // Call the test swap API for now (bypasses environment issues)
+      setLoadingMessage("Executing cross-chain swap...");
+      const response = await fetch("/api/test-swap", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: swapAmount,
+          userAddress: address,
+          aptosAddress: petraAddress,
+        }),
+      });
 
-      const musdcContract = new ethers.Contract(
-        SEPOLIA_MUSDC,
-        [
-          "function balanceOf(address) view returns (uint256)",
-          "function decimals() view returns (uint8)",
-          "function approve(address,uint256)",
-        ],
-        walletSigner
-      );
+      const result = await response.json();
 
-      const balance = await musdcContract.balanceOf(address);
-      const decimals = await musdcContract.decimals();
-      const balanceInUnits = ethers.formatUnits(balance, decimals);
-
-      if (parseFloat(balanceInUnits) < swapAmount) {
-        throw new Error(
-          `Insufficient mUSDC balance. You have ${balanceInUnits} mUSDC`
-        );
+      if (!result.success) {
+        if (result.error === "Missing environment variables") {
+          console.error("Environment setup required:", result.instructions);
+          throw new Error(
+            `Setup required: ${result.details}. Check console for instructions.`
+          );
+        }
+        throw new Error(result.error || "Swap failed");
       }
 
-      // Approve factory to spend mUSDC
-      const approveTx = await musdcContract.approve(
-        SEPOLIA_CONTRACTS.factory,
-        ethers.parseUnits(swapAmount.toString(), decimals)
-      );
-      await approveTx.wait();
+      setLoadingMessage("Swap completed successfully!");
+      toast.success("Cross-chain swap executed successfully!");
 
-      // Create escrow
-      const safetyDepositAmount = ethers.parseEther("0.001");
-      const currentTime = Math.floor(Date.now() / 1000);
-
-      const escrowFactoryABI = [
-        "function createDstEscrow((bytes32,bytes32,uint256,uint256,uint256,uint256,uint256,uint256), uint256) external payable",
-      ];
-
-      const escrowFactory = new ethers.Contract(
-        SEPOLIA_CONTRACTS.factory,
-        escrowFactoryABI,
-        walletSigner
+      console.log("Swap Result:", result);
+      console.log("Secret:", result.secret);
+      console.log(
+        "Order IDs:",
+        result.transactions.announceOrderId,
+        result.transactions.fundOrderId
       );
 
-      const totalValue = safetyDepositAmount;
-
-      const immutables = [
-        secretHash,
-        secretHash,
-        BigInt(address!),
-        BigInt(address!),
-        BigInt(SEPOLIA_MUSDC),
-        ethers.parseUnits(swapAmount.toString(), decimals),
-        safetyDepositAmount,
-        ethers.parseUnits("86400", 0),
-      ];
-
-      const escrowTx = await escrowFactory.createDstEscrow(
-        immutables,
-        currentTime + 86400,
-        {
-          value: totalValue,
-          gasLimit: 300000,
-        }
+      // Store swap details for claiming
+      localStorage.setItem(
+        "lastSwap",
+        JSON.stringify({
+          swapId: result.swapId,
+          secret: result.secret,
+          fundOrderId: result.transactions.fundOrderId,
+          ethAmount: result.amounts.ethAmount,
+          aptAmount: result.amounts.aptAmount,
+        })
       );
 
-      const sepoliaReceipt = await escrowTx.wait();
-
-      // Step 2: Initialize Aptos swap ledger
-      setLoadingMessage("Initializing Aptos swap ledger...");
-      const aptos = (window as any).aptos;
-      const payload = {
-        type: "entry_function_payload",
-        function: `${APTOS_CONTRACTS.swapV3Module}::initialize_swap_ledger`,
-        type_arguments: [APTOS_APT_TOKEN],
-        arguments: [],
-      };
-
-      const txn = await aptosClient.generateTransaction(petraAddress!, payload);
-      const signedTxn = await aptos.signAndSubmitTransaction(txn);
-      const ledgerResult = await aptosClient.waitForTransaction(signedTxn.hash);
-
-      // Step 3: Announce order on Aptos
-      setLoadingMessage("Announcing order on Aptos...");
-      const aptAmount = ethers.parseUnits(swapAmount.toString(), 8);
-      const announcePayload = {
-        type: "entry_function_payload",
-        function: `${APTOS_CONTRACTS.swapV3Module}::announce_order`,
-        type_arguments: [APTOS_APT_TOKEN],
-        arguments: [
-          aptAmount.toString(),
-          aptAmount.toString(),
-          86400,
-          Array.from(ethers.getBytes(secretHash)),
-        ],
-      };
-
-      const announceTxn = await aptosClient.generateTransaction(
-        petraAddress!,
-        announcePayload
-      );
-      const announceSignedTxn =
-        await aptos.signAndSubmitTransaction(announceTxn);
-      const announceResult = await aptosClient.waitForTransaction(
-        announceSignedTxn.hash
-      );
-
-      // Step 4: Fund Aptos escrow
-      setLoadingMessage("Funding Aptos escrow...");
-      const fundPayload = {
-        type: "entry_function_payload",
-        function: `${APTOS_CONTRACTS.swapV3Module}::fund_dst_escrow`,
-        type_arguments: [APTOS_APT_TOKEN],
-        arguments: [
-          aptAmount.toString(),
-          86400,
-          Array.from(ethers.getBytes(secretHash)),
-        ],
-      };
-
-      const fundTxn = await aptosClient.generateTransaction(
-        petraAddress!,
-        fundPayload
-      );
-      const fundSignedTxn = await aptos.signAndSubmitTransaction(fundTxn);
-      const fundResult = await aptosClient.waitForTransaction(
-        fundSignedTxn.hash
-      );
-
-      // Step 5: Wait before claiming
-      setLoadingMessage("Waiting before claiming funds...");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Step 6: Claim APT on Aptos
-      setLoadingMessage("Claiming APT on Aptos...");
-      const claimPayload = {
-        type: "entry_function_payload",
-        function: `${APTOS_CONTRACTS.swapV3Module}::claim_funds`,
-        type_arguments: [APTOS_APT_TOKEN],
-        arguments: ["100", secret], // Using order ID 100 as fallback
-      };
-
-      const claimTxn = await aptosClient.generateTransaction(
-        petraAddress!,
-        claimPayload
-      );
-      const claimSignedTxn = await aptos.signAndSubmitTransaction(claimTxn);
-      const claimResult = await aptosClient.waitForTransaction(
-        claimSignedTxn.hash
-      );
-
-      setLoadingMessage(null);
-
-      toast.success("Cross-chain swap completed successfully!");
-
-      // Reset form
+      setIsReviewComplete(false);
       setAmountIn("");
       setAmountOut("");
-      setQuoteData(null);
-      setIsReviewComplete(false);
     } catch (error) {
-      console.error("Error executing swap:", error);
+      console.error("Swap execution failed:", error);
       toast.error(
         `Swap failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
@@ -399,9 +326,137 @@ const SwapInterface: React.FC = () => {
     }
   };
 
-  // Handle approve (placeholder for now)
+  // Check environment variables
+  const checkEnvironment = async () => {
+    try {
+      const response = await fetch("/api/check-env");
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("Environment check:", result.environment);
+        if (
+          result.environment.sepoliaPrivateKey &&
+          result.environment.aptosPrivateKey
+        ) {
+          toast.success("Environment variables are set correctly!");
+        } else {
+          toast.error("Missing environment variables! Check .env file.");
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to check environment");
+    }
+  };
+
+  // Manual swap simulation (for testing without environment variables)
+  const manualSwap = async () => {
+    if (!amountIn || !address || !petraAddress) {
+      toast.error("Please connect wallets and enter amount");
+      return;
+    }
+
+    try {
+      setIsSwapping(true);
+      setLoadingMessage("Simulating cross-chain swap...");
+
+      // Simulate the swap process
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const ethAmount = parseFloat(amountIn);
+      const aptAmount = ethAmount * 1000; // 0.001 ETH = 1 APT
+
+      const swapResult = {
+        swapId: `manual_swap_${Date.now()}`,
+        secret: "0x6d616e75616c5f7365637265745f70617373776f7264",
+        secretHash:
+          "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        transactions: {
+          sepoliaEscrow: "SIMULATED_SEPOLIA_TX",
+          aptosInit: "SIMULATED_APTOS_INIT",
+          aptosAnnounce: "SIMULATED_APTOS_ANNOUNCE",
+          aptosFund: "SIMULATED_APTOS_FUND",
+          announceOrderId: 1,
+          fundOrderId: 2,
+        },
+        amounts: {
+          ethAmount: ethAmount,
+          aptAmount: aptAmount,
+        },
+      };
+
+      setLoadingMessage("Swap completed successfully!");
+      toast.success("Manual swap completed! Check console for details.");
+
+      console.log("Manual Swap Result:", swapResult);
+      console.log("Secret:", swapResult.secret);
+      console.log(
+        "Order IDs:",
+        swapResult.transactions.announceOrderId,
+        swapResult.transactions.fundOrderId
+      );
+
+      // Store swap details
+      localStorage.setItem(
+        "lastSwap",
+        JSON.stringify({
+          swapId: swapResult.swapId,
+          secret: swapResult.secret,
+          fundOrderId: swapResult.transactions.fundOrderId,
+          ethAmount: swapResult.amounts.ethAmount,
+          aptAmount: swapResult.amounts.aptAmount,
+        })
+      );
+
+      setIsReviewComplete(false);
+      setAmountIn("");
+      setAmountOut("");
+    } catch (error) {
+      console.error("Manual swap failed:", error);
+      toast.error(
+        `Manual swap failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    } finally {
+      setIsSwapping(false);
+      setLoadingMessage(null);
+    }
+  };
+
+  // Handle approve - for ETH swaps, we need to check balance and proceed
   const handleApprove = async () => {
-    toast.info("Approval not required for this swap type");
+    if (!address || !amountIn) {
+      toast.error("Please connect wallet and enter amount");
+      return;
+    }
+
+    try {
+      setIsReviewing(true);
+      setLoadingMessage("Checking ETH balance...");
+
+      // Check ETH balance on Sepolia
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const balance = await provider.getBalance(address);
+      const requiredAmount = ethers.parseEther(amountIn);
+      const safetyDeposit = ethers.parseEther("0.001");
+      const totalRequired = requiredAmount + safetyDeposit;
+
+      if (balance < totalRequired) {
+        throw new Error(
+          `Insufficient ETH balance. You need ${ethers.formatEther(totalRequired)} ETH (including 0.001 ETH safety deposit)`
+        );
+      }
+
+      toast.success("Balance check passed! Ready to swap.");
+      setIsReviewComplete(true);
+      setLoadingMessage(null);
+    } catch (error) {
+      console.error("Approval failed:", error);
+      toast.error(
+        `Approval failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    } finally {
+      setIsReviewing(false);
+      setLoadingMessage(null);
+    }
   };
 
   return (
@@ -462,72 +517,71 @@ const SwapInterface: React.FC = () => {
 
       {/* Swap Interface */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700/50">
-        <h2 className="text-xl font-semibold text-white mb-4">
-          Swap Interface
-        </h2>
-
-        {/* Token Input */}
-        <TokenInputWrapper
-          amount={amountIn}
-          setAmount={setAmountIn}
-          token={tokenIn}
-          onTokenSelect={handleTokenInSelect}
-          label="From"
-          placeholder="0.0"
-          disabled={isSwapping}
-        />
-
-        {/* Interchange Button */}
-        <div className="flex justify-center my-4">
-          <button
-            onClick={handleInterchange}
-            className="p-2 bg-gray-700 hover:bg-gray-600 rounded-full transition-colors"
-            disabled={isSwapping}
-          >
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-white">
+              Sepolia → Aptos Cross-Chain Swap
+            </h2>
+            <p className="text-gray-400 text-sm">
+              Swap ETH on Sepolia for APT on Aptos (0.001 ETH = 1 APT)
+            </p>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={checkEnvironment}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-              />
-            </svg>
-          </button>
+              Check Env
+            </button>
+            <button
+              onClick={manualSwap}
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
+            >
+              Manual Swap
+            </button>
+          </div>
         </div>
 
-        {/* Token Output */}
+        {/* Token Input Wrapper */}
         <TokenInputWrapper
-          amount={amountOut}
-          setAmount={setAmountOut}
-          token={tokenOut}
-          onTokenSelect={handleTokenOutSelect}
-          label="To"
-          placeholder="0.0"
-          disabled={true}
+          amount={amountIn}
+          amountOut={amountOut}
+          setAmount={setAmountIn}
+          setAmountOut={setAmountOut}
+          handleInterchange={handleInterchange}
+          isLoading={isLoading}
+          tokenIn={tokenIn}
+          tokenOut={tokenOut}
+          onTokenInSelect={handleTokenInSelect}
+          onTokenOutSelect={handleTokenOutSelect}
+          usdValue={quoteData?.ethAmount}
+          balance="0.00"
         />
 
         {/* Quote Data */}
         {quoteData && (
-          <DisplayData
-            ethAmount={quoteData.ethAmount}
-            aptosAmount={quoteData.aptosAmount}
-            exchangeRate={quoteData.exchangeRate}
-            ethPrice={quoteData.ethPrice}
-            aptPrice={quoteData.aptPrice}
-          />
+          <div className="mb-4 p-4 bg-gray-700/30 rounded-lg">
+            <DisplayData
+              value={`${quoteData.ethAmount} mUSDC`}
+              text="Amount to Send"
+            />
+            <DisplayData
+              value={`${quoteData.aptosAmount} APT`}
+              text="Amount to Receive"
+            />
+            <DisplayData
+              value={`1 mUSDC = ${quoteData.exchangeRate.toFixed(4)} APT`}
+              text="Exchange Rate"
+            />
+          </div>
         )}
 
         {/* Action Buttons */}
         <SwapActionButton
           isConnected={isConnected && isPetraConnected}
           isReviewComplete={isReviewComplete}
+          isPending={isSwapping}
           isReviewing={isReviewing}
-          isSwapping={isSwapping}
           onReview={reviewSwap}
           onSwap={executeSwap}
           onApprove={handleApprove}
