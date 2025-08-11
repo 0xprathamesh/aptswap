@@ -1,4 +1,4 @@
-# Cross-Swaps Protocol
+# Cross-Swaps Protocol - AptSwap
 
 A cross-chain swap protocol that extends 1inch functionality to unsupported chains, enabling seamless token swaps between EVM chains and Aptos blockchain.
 
